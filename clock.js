@@ -1,14 +1,16 @@
-function Clock() {
+function Clock(x, y) {
+	this.radius = 25;
+	this.pos = createVector(x, y);
 
-  this.seconds = 0;
-  this.minutes = 0;
-  this.hours = 0;
+	this.color = 255;
 
-  this.update = function() {
-    this.seconds = second().toString().split("").map(Number);
-    this.minutes = minute().toString().split("").map(Number);
-    this.hours = hour().toString().split("").map(Number);
+	this.show = function(areaX, areaY) {
 
-    console.log(this.seconds);
-  };
+		push();
+		translate(areaX, areaY);
+		fill(this.color);
+		ellipse(this.pos.x, this.pos.y, this.radius * 2, this.radius * 2);
+		pop();
+
+	}
 }

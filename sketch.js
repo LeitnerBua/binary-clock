@@ -1,104 +1,152 @@
-var grid = [];
+let clocksSeconds = [];
+let clocksMinutes = [];
+let clocksHours = [];
+let lampPadding = 70;
 
-var clock;
-var lampHours = [];
+let areaSpacing = {x: 200, y: 200};
 
-var seperator = [];
+let title;
 
-var cols = 6 * 2;
-var rows = 6 * 2;
-
-var cellWidth;
-var cellHeight;
-
-var margin = 3;
-
-var textList;
 
 function setup() {
-    createCanvas(800, 800);
+	createCanvas(800, 600);
 
-    for (var c = 0; c < cols; c++) {
-        grid[c] = new Array(rows);
-    }
+	clocksSeconds = createArea();
+	clocksMinutes = createArea();
+	clocksHours = createArea(true);
 
-    cellWidth = floor(width / cols);
-    cellHeight = floor(height / rows);
+	frameRate(10);
 
-    for (var i = 0; i < cols; i++) {
-        for (var j = 0; j < rows; j++) {
-            grid[i][j] = new Cell(i, j, cellWidth, cellHeight);
-        }
-    }
-
-    clock = new Clock();
-    frameRate(20);
-
-
-    var lampList = [0, 0, 2, 4, 0, 3, 4, 0, 3, 4];
-    // start column = 6
-    // start row = 3
-
-    for (var x = cols - 1; x >= cols - 10; x--) {
-        var lamp = lampList[x];
-        var xAchses = x * cellWidth + (floor(cellWidth / 2));
-        for (var y = rows - margin; y > rows - margin - lamp; y--) {
-            var yAchses = y * cellHeight + (floor(cellHeight / 2));
-                lampHours.push(new Lamp(xAchses, yAchses));
-                lampHours[lampHours.length-1].updateValue(y);
-        }
-
-        if (lamp === 0) {
-            seperator.push([xAchses, cellHeight*(rows-margin-4+1), xAchses, cellHeight*(rows-margin+1)]);
-        }
-    }
-
-    textList = initDigits();
-    textAlign(CENTER);
-    textSize(32);
-
-
+	title = createElement("title");
 }
 
 function draw() {
-    background(0);
+	background(0);
 
+	drawArea(clocksSeconds, width-areaSpacing.x, height-areaSpacing.y);
+	drawArea(clocksMinutes, width-(areaSpacing.x * 2), height-areaSpacing.y);
+	drawArea(clocksHours, width-(areaSpacing.x * 3), height-areaSpacing.y);
 
-    for (var i = 0; i < cols; i++) {
-        for (var j = 0; j < cols; j++) {
-            grid[i][j].show();
-        }
-    }
+	stroke(255);
+	strokeWeight(3);
+	line(width-areaSpacing.x-(lampPadding*2), height-areaSpacing.y, width-areaSpacing.x-(lampPadding*2), height-(areaSpacing.y *2));
+	line(width-(areaSpacing.x*2)-(lampPadding*2), height-areaSpacing.y, width-(areaSpacing.x * 2) - (lampPadding * 2), height-(areaSpacing.y * 2));
 
-    clock.update();
+	drawDigits();
 
-    for (var l = 0; l < lampHours.length; l++) {
-        lampHours[l].show(255);
-    }
+	let timeSecond = second();
+	let timeMinute = minute();
+	let timeHour = hour();
 
-    for (var s = 0; s < seperator.length; s++) {
-        stroke(255);
-        line(seperator[s][0], seperator[s][1], seperator[s][2], seperator[s][3]);
-    }
+	let bSecond = timeSecond.toString().split("").map(Number).reverse();
+	let bMinute = timeMinute.toString().split("").map(Number).reverse();
+	let bHour = timeHour.toString().split("").map(Number).reverse();
 
-    for (var d = 0; d < textList.length; d++) {
-        fill(255);
-        text(textList[d][0], textList[d][1], textList[d][2]);
-    }
+	updateClock(bSecond, clocksSeconds);
+	updateClock(bMinute, clocksMinutes);
+	updateClock(bHour, clocksHours);
+
+	digitalClock(timeHour, timeMinute, timeSecond);
+
 
 
 }
 
-function initDigits() {
-    var textData = [];
-    var textX = (cols -2)*cellWidth+(floor(cellWidth / 2));
-    var digits = ["1", "2", "4", "8"];
-    var digitsIndex = 0;
+function createArea(hours) {
 
-    for(var textY = rows-margin; textY > rows-margin-digits.length; textY--) {
-        textData.push([digits[digitsIndex], textX, textY*cellHeight+(floor(cellHeight / 2) + 10)]);
-        digitsIndex++;
-    }
+	let area = [];
 
-    return textData;
+	let y = 0;
+	let x = 0;
+	let lamps = 4;
+	for(let i = 0; i < 2; i++) {
+		area.push([])
+		for(let j = 0; j < lamps; j++) {
+			area[area.length-1].push(new Clock(x, y));
+			y -= lampPadding;
+		}
+		y = 0;
+		if(hours)
+			lamps = 2;
+		else
+			lamps = 3;
+
+		x -= lampPadding;
+	}
+	return area;
+}
+
+function drawArea(timeArray, x, y) {
+	for(let i = 0; i < timeArray.length; i++) {
+		for(let j = 0; j < timeArray[i].length; j++) {
+		timeArray[i][j].show(x, y);
+		}
+	}
+}
+
+function drawDigits() {
+
+	push();
+	translate(width-(areaSpacing.x / 1.5), height-areaSpacing.y);
+
+	let x = 0;
+	let y = 0;
+
+	fill(255);
+	textSize(48);
+	noStroke();
+	textAlign(CENTER, CENTER);
+
+	for(let i = 1; i <= 8; i *= 2) {
+		text(i, x, y)
+
+		y -= lampPadding;
+	}
+
+	pop();
+
+}
+
+function digitalClock(h, m, s) {
+	push();
+	fill(255);
+	noStroke();
+	textSize(96);
+	textAlign(RIGHT, CENTER);
+	let seperator = ":";
+	
+	let formattedSeconds = ("0" + s).slice(-2);
+	let formattedMinutes = ("0" + m).slice(-2);
+	let formattedHours = ("0" + h).slice(-2);
+
+	text(formattedSeconds, width-areaSpacing.x+20, height-areaSpacing.y+100);
+	text(seperator, width-areaSpacing.x-(lampPadding*2)+15, height-(areaSpacing.y/2)-10);
+	text(formattedMinutes, width-(areaSpacing.x * 2)+20, height-areaSpacing.y+100);
+	text(seperator, (width-areaSpacing.x*2)-(lampPadding*2)+15, height-(areaSpacing.y/2)-10);
+	text(formattedHours, width-(areaSpacing.x * 3)+20, height-areaSpacing.y+100);
+
+	title.html(formattedHours + ":" + formattedMinutes + ":" + formattedSeconds);
+
+	pop();
+}
+
+function updateClock(time, lampArray) {
+
+	if(time.length < 2)
+		time.push(0);
+
+
+	for(let i = 0; i < time.length; i++) {
+
+		for(let j = 0; j < lampArray[i].length; j++) {
+			let bit = (time[i] >> j) & 1;
+
+			if(bit)
+				lampArray[i][j].color = (255, 0, 0);
+			else
+				lampArray[i][j].color = 255;
+
+		}
+	}
+	
 }
