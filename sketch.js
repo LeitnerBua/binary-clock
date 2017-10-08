@@ -5,8 +5,6 @@ let lampPadding = 70;
 
 let areaSpacing = {x: 200, y: 200};
 
-let title;
-
 
 function setup() {
 	createCanvas(800, 600);
@@ -17,7 +15,6 @@ function setup() {
 
 	frameRate(10);
 
-	title = createElement("title");
 }
 
 function draw() {
@@ -114,7 +111,7 @@ function digitalClock(h, m, s) {
 	textSize(96);
 	textAlign(RIGHT, CENTER);
 	let seperator = ":";
-	
+
 	let formattedSeconds = ("0" + s).slice(-2);
 	let formattedMinutes = ("0" + m).slice(-2);
 	let formattedHours = ("0" + h).slice(-2);
@@ -125,7 +122,7 @@ function digitalClock(h, m, s) {
 	text(seperator, (width-areaSpacing.x*2)-(lampPadding*2)+15, height-(areaSpacing.y/2)-10);
 	text(formattedHours, width-(areaSpacing.x * 3)+20, height-areaSpacing.y+100);
 
-	title.html(formattedHours + ":" + formattedMinutes + ":" + formattedSeconds);
+	document.title = formattedHours + ":" + formattedMinutes + ":" + formattedSeconds;
 
 	pop();
 }
@@ -148,5 +145,5 @@ function updateClock(time, lampArray) {
 
 		}
 	}
-	
+
 }
