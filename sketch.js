@@ -5,6 +5,8 @@ let lampPadding = 70;
 
 let areaSpacing = {x: 200, y: 200};
 
+let w;
+
 
 function setup() {
 	createCanvas(800, 600);
@@ -14,6 +16,8 @@ function setup() {
 	clocksHours = createArea(true);
 
 	frameRate(10);
+
+	startWorker();
 
 }
 
@@ -112,9 +116,9 @@ function digitalClock(h, m, s) {
 	textAlign(RIGHT, CENTER);
 	let seperator = ":";
 
-	let formattedSeconds = ("0" + s).slice(-2);
-	let formattedMinutes = ("0" + m).slice(-2);
-	let formattedHours = ("0" + h).slice(-2);
+	let formattedSeconds = formatTime(s);
+	let formattedMinutes = formatTime(m);
+	let formattedHours = formatTime(h);
 
 	text(formattedSeconds, width-areaSpacing.x+20, height-areaSpacing.y+100);
 	text(seperator, width-areaSpacing.x-(lampPadding*2)+15, height-(areaSpacing.y/2)-10);
@@ -122,9 +126,14 @@ function digitalClock(h, m, s) {
 	text(seperator, (width-areaSpacing.x*2)-(lampPadding*2)+15, height-(areaSpacing.y/2)-10);
 	text(formattedHours, width-(areaSpacing.x * 3)+20, height-areaSpacing.y+100);
 
-	document.title = formattedHours + ":" + formattedMinutes + ":" + formattedSeconds;
+	
 
 	pop();
+}
+
+
+function formatTime(time) {
+	return ("0" + time).slice(-2);
 }
 
 function updateClock(time, lampArray) {
@@ -146,4 +155,18 @@ function updateClock(time, lampArray) {
 		}
 	}
 
+}
+
+
+function startWorker() {
+    if(typeof(Worker) !== "undefined") {
+        if(typeof(w) == "undefined") {
+            w = new Worker("updateTitle.js");
+        }
+        w.onmessage = function(event) {
+            document.title = event.data;
+        };
+    } else {
+        document.getElementById("result").innerHTML = "Sorry! No Web Worker support.";
+    }
 }
