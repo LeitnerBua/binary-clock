@@ -4,4 +4,4 @@
 
 ## Live Demo
 
-[Binary-Clock](https://leitnerbua.github.io/binary-clock/)
+[Binary-Clock](https://leitnerdominik.github.io/binary-clock/)
